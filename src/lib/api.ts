@@ -95,6 +95,25 @@ export interface NameInfo {
 }
 
 // API client class
+const FALLBACK_STATS: NetworkStats = {
+  latestBlock: 0,
+  totalTransactions: 0,
+  activeAddresses: 0,
+  totalValueLocked: 0,
+  averageTps: 0,
+  averageBlockTime: 5000,
+  verifiedBatches: 0,
+  storageUsed: 0,
+  blockGrowth: 0,
+  txGrowth: 0,
+  addressGrowth: 0,
+  tvlGrowth: 0,
+  tpsGrowth: 0,
+  blockTimeChange: 0,
+  batchGrowth: 0,
+  storageGrowth: 0,
+};
+
 class ApiClient {
   private baseUrl: string;
   private rpcUrl: string;
@@ -161,7 +180,12 @@ class ApiClient {
 
   // Network statistics
   async getNetworkStats(): Promise<NetworkStats> {
-    return this.request<NetworkStats>('/api/v1/stats');
+    try {
+      return await this.request<NetworkStats>('/api/v1/stats');
+    } catch (error) {
+      console.warn('Falling back to placeholder network stats:', error);
+      return FALLBACK_STATS;
+    }
   }
 
   // Transactions
